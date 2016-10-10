@@ -372,16 +372,16 @@ bool Service::Start() {
             free(ret_scon);
         }
         if (rc == 0 && scon == mycon) {
-            ERROR("Service %s does not have a SELinux domain defined.\n", name_.c_str());
-            free(mycon);
-            free(fcon);
-            return false;
+            ERROR("Please define SELinux domain for %s . This is a security risk\n", name_.c_str());
+            // free(mycon);
+            // free(fcon);
+            // return false;
         }
         free(mycon);
         free(fcon);
         if (rc < 0) {
             ERROR("could not get context while starting '%s'\n", name_.c_str());
-            return false;
+            // return false;
         }
     }
 
