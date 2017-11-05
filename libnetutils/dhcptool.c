@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <err.h>
 #include <errno.h>
 #include <error.h>
 #include <stdbool.h>
@@ -31,14 +30,12 @@ int main(int argc, char* argv[]) {
 
   char* interface = argv[1];
   if (ifc_init()) {
-    err(errno, "dhcptool %s: ifc_init failed", interface);
-    ifc_close();
-    return EXIT_FAILURE;
+    error(EXIT_FAILURE, errno, "dhcptool %s: ifc_init failed", interface);
   }
 
   int rc = do_dhcp(interface);
   if (rc) {
-    err(errno, "dhcptool %s: do_dhcp failed", interface);
+    error(0, errno, "dhcptool %s: do_dhcp failed", interface);
   }
 
   ifc_close();

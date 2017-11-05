@@ -19,7 +19,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
-#include <pthread.h>
 
 #include <sys/socket.h>
 #include <sys/select.h>
@@ -58,8 +57,6 @@
 
 static int ifc_ctl_sock = -1;
 static int ifc_ctl_sock6 = -1;
-static pthread_mutex_t ifc_sock_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
-static pthread_mutex_t ifc_sock6_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
 void printerr(char *fmt, ...);
 
 #define DBG 0
@@ -125,8 +122,6 @@ int string_to_ip(const char *string, struct sockaddr_storage *ss) {
 int ifc_init(void)
 {
     int ret;
-
-    pthread_mutex_lock(&ifc_sock_mutex);
     if (ifc_ctl_sock == -1) {
         ifc_ctl_sock = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0);
         if (ifc_ctl_sock < 0) {
@@ -141,7 +136,6 @@ int ifc_init(void)
 
 int ifc_init6(void)
 {
-    pthread_mutex_lock(&ifc_sock6_mutex);
     if (ifc_ctl_sock6 == -1) {
         ifc_ctl_sock6 = socket(AF_INET6, SOCK_DGRAM | SOCK_CLOEXEC, 0);
         if (ifc_ctl_sock6 < 0) {
@@ -158,7 +152,6 @@ void ifc_close(void)
         (void)close(ifc_ctl_sock);
         ifc_ctl_sock = -1;
     }
-    pthread_mutex_unlock(&ifc_sock_mutex);
 }
 
 void ifc_close6(void)
@@ -167,7 +160,6 @@ void ifc_close6(void)
         (void)close(ifc_ctl_sock6);
         ifc_ctl_sock6 = -1;
     }
-    pthread_mutex_unlock(&ifc_sock6_mutex);
 }
 
 static void ifc_init_ifr(const char *name, struct ifreq *ifr)
@@ -560,7 +552,6 @@ int ifc_act_on_ipv4_route(int action, const char *ifname, struct in_addr dst, in
     ifc_init();
 
     if (ifc_ctl_sock < 0) {
-        ifc_close();
         return -errno;
     }
 
