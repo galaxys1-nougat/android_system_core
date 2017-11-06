@@ -496,8 +496,8 @@ static int audit_callback(void *data, security_class_t /*cls*/, char *buf, size_
 
 static void security_failure() {
     ERROR("Security failure; rebooting into recovery mode...\n");
-    android_reboot(ANDROID_RB_RESTART2, 0, "recovery");
-    while (true) { pause(); }  // never reached
+    // android_reboot(ANDROID_RB_RESTART2, 0, "recovery");
+    // while (true) { pause(); }  // never reached
 }
 
 static void selinux_initialize(bool in_kernel_domain) {
